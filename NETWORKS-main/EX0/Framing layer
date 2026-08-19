@@ -1,6 +1,6 @@
-[24bcs179@mepcolinux EX0]$cat EX0.prn
+[24bcs154@mepcolinux EX0]$cat EX0.prn
 Script started on Thursday 16 July 2026 10:36:34 AM IST
-[?1034h[24bcs179@mepcolinux EX0]$cat url.c 
+[?1034h[24bcs154@mepcolinux EX0]$cat url.c 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -391,7 +391,7 @@ int main() {
     return 0;
 }
 
-[24bcs179@mepcolinux EX0]$./a.out
+[24bcs154@mepcolinux EX0]$./a.out
 =====================================================
      SIMPLE 4-LAYER NETWORK SIMULATOR (in binary)
 =====================================================
@@ -698,7 +698,7 @@ Data Link layer bits : 280
 Total packets        : 7
 Total frames         : 14
 =========================================
-[24bcs179@mepcolinux EX0]exit
+[24bcs154@mepcolinux EX0]exit
 
 Script done on Thursday 16 July 2026 10:37:19 AM IST
 
