@@ -1,6 +1,6 @@
-[24bcs179@mepcolinux EX1]$cat EX1.prn 
+[24bcs154@mepcolinux EX1]$cat EX1.prn 
 Script started on Tue Jul 28 10:36:37 2026
-[1034h[24bcs179@mepcolinux EX1]$cat BISYNC.c 
+[1034h[24bcs154@mepcolinux EX1]$cat BISYNC.c 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -176,7 +176,7 @@ int main()
     return 0;
 }
 
-[24bcs179@mepcolinux EX1]$cat DDCMP.c
+[24bcs154@mepcolinux EX1]$cat DDCMP.c
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -622,8 +622,8 @@ int main() {
     return 0;
 }
 
-[24bcs179@mepcolinux EX1]$gcc BISYNC.c 
-[24bcs179@mepcolinux EX1]$./a.out
+[24bcs154@mepcolinux EX1]$gcc BISYNC.c 
+[24bcs154@mepcolinux EX1]$./a.out
 ========== BISYNC CHARACTER STUFFING ==========
 Enter Header : 1010
 Enter Body (space separated, e.g. STX DLE ETX) : STX SAI
@@ -648,7 +648,7 @@ SYN SYN SOH 1010 STX DLE STX SAI ETX CRC
 
 Destuffed Frame :
 SYN SYN SOH 1010 STX STX SAI ETX CRC
-[24bcs179@mepcolinux EX1]$exit
+[24bcs154@mepcolinux EX1]$exit
 exit
 
 Script done on Tue Jul 28 10:37:12 2026
