@@ -1,4 +1,4 @@
-[24bcs179@mepcolinux EX3]$cat 2D.c 
+[24bcs154@mepcolinux EX3]$cat 2D.c 
 #include <stdio.h>
 #include <string.h>
 
