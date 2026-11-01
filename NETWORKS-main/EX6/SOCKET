@@ -1,0 +1,28 @@
+#include <string.h>
+#include <stdlib.h>
+#include <math.h>
+
+int leastInterval(char* tasks, int tasksSize, int n) {
+    int freq[26] = {0};
+    int maxCount = 0;
+    
+    // Count the frequency of each task
+    for (int i = 0; i < tasksSize; i++) {
+        freq[tasks[i] - 'A']++;
+        if (freq[tasks[i] - 'A'] > maxCount) {
+            maxCount = freq[tasks[i] - 'A'];
+        }
+    }
+    
+    // Count how many tasks have the maximum frequency
+    int maxCountTasks = 0;
+    for (int i = 0; i < 26; i++) {
+        if (freq[i] == maxCount) {
+            maxCountTasks++;
+        }
+    }
+    
+    // Calculate the minimum intervals required
+    int intervals = (maxCount - 1) * (n + 1) + maxCountTasks;
+    return intervals > tasksSize ? intervals : tasksSize;
+}
