@@ -1,0 +1,53 @@
+#include <stdlib.h>
+
+/**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+int* numOfBurgers(int tomatoSlices, int cheeseSlices, int* returnSize) {
+    // A Jumbo burger needs 4 tomato slices and 1 cheese slice.
+    // A Small burger needs 2 tomato slices and 1 cheese slice.
+    
+    // Mathematical Formulation:
+    // 4 * jumbo + 2 * small = tomatoSlices
+    // jumbo + small = cheeseSlices -> small = cheeseSlices - jumbo
+    
+    // Substituting small into the tomato equation:
+    // 4 * jumbo + 2 * (cheeseSlices - jumbo) = tomatoSlices
+    // 2 * jumbo + 2 * cheeseSlices = tomatoSlices
+    // 2 * jumbo = tomatoSlices - 2 * cheeseSlices
+    
+    // Therefore:
+    // jumbo = (tomatoSlices - 2 * cheeseSlices) / 2
+    
+    // Conditions for a valid, non-wasteful configuration:
+    // 1. (tomatoSlices - 2 * cheeseSlices) must be non-negative and even.
+    // 2. small (cheeseSlices - jumbo) must be non-negative.
+    
+    long remainingTomatoes = (long)tomatoSlices - 2 * (long)cheeseSlices;
+    
+    if (remainingTomatoes < 0 || remainingTomatoes % 2 != 0) {
+        *returnSize = 0;
+        return NULL;
+    }
+    
+    int jumbo = remainingTomatoes / 2;
+    int small = cheeseSlices - jumbo;
+    
+    if (small < 0) {
+        *returnSize = 0;
+        return NULL;
+    }
+    
+    // Allocate memory for the 2-element array as required by LeetCode
+    int* result = (int*)malloc(2 * sizeof(int));
+    if (result == NULL) {
+        *returnSize = 0;
+        return NULL;
+    }
+    
+    result[0] = jumbo;
+    result[1] = small;
+    *returnSize = 2; // Crucial step so the LeetCode engine reads the output size properly
+    
+    return result;
+}
