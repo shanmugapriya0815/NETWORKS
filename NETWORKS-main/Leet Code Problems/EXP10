@@ -1,1 +1,107 @@
+#include <stdlib.h>
+#include <string.h>
+
+// Structure to pair values with their original indices for stable sorting
+typedef struct {
+    int val;
+    int id;
+} Pair;
+
+int compare_pairs(const void* a, const void* b) {
+    Pair* pa = (Pair*)a;
+    Pair* pb = (Pair*)b;
+    if (pa->val != pb->val) {
+        return (pa->val > pb->val) - (pa->val < pb->val);
+    }
+    return pa->id - pb->id;
+}
+
+// Fenwick Tree (BIT) Operations
+void update(int* bit, int size, int idx, int val) {
+    for (; idx <= size; idx += idx & -idx) {
+        bit[idx] += val;
+    }
+}
+
+// Binary lifting on BIT to find the element at a given cumulative frequency (rank)
+int find_kth(int* bit, int size, int target_freq) {
+    int idx = 0;
+    for (int i = 1 << 16; i > 0; i >>= 1) { // 1<<16 covers up to 65536 elements
+        if (idx + i <= size && bit[idx + i] < target_freq) {
+            idx += i;
+            target_freq -= bit[idx];
+        }
+    }
+    return idx + 1;
+}
+
+double* medianSlidingWindow(int* nums, int numsSize, int k, int* returnSize) {
+    *returnSize = numsSize - k + 1;
+    double* result = (double*)malloc((*returnSize) * sizeof(double));
+    
+    // 1. Coordinate Compression
+    Pair* pairs = (Pair*)malloc(numsSize * sizeof(Pair));
+    for (int i = 0; i < numsSize; i++) {
+        pairs[i].val = nums[i];
+        pairs[i].id = i;
+    }
+    qsort(pairs, numsSize, sizeof(Pair), compare_pairs);
+    
+    // ranks array will hold the 1-based compressed rank for each element in nums
+    int* ranks = (int*)malloc(numsSize * sizeof(int));
+    // unique_vals maps the rank back to the actual double value
+    double* unique_vals = (double*)malloc((numsSize + 1) * sizeof(double));
+    
+    int rank = 1;
+    ranks[pairs[0].id] = rank;
+    unique_vals[rank] = pairs[0].val;
+    
+    for (int i = 1; i < numsSize; i++) {
+        if (pairs[i].val != pairs[i - 1].val) {
+            rank++;
+        }
+        ranks[pairs[i].id] = rank;
+        unique_vals[rank] = pairs[i].val;
+    }
+    
+    // 2. Initialize BIT
+    int bit_size = rank;
+    int* bit = (int*)calloc(bit_size + 1, sizeof(int));
+    
+    // Build the initial window of size k-1
+    for (int i = 0; i < k - 1; i++) {
+        update(bit, bit_size, ranks[i], 1);
+    }
+    
+    // Targets for finding the median
+    int mid1 = (k + 1) / 2;
+    int mid2 = (k / 2) + 1;
+    
+    // 3. Slide the window
+    for (int i = k - 1; i < numsSize; i++) {
+        // Add current element to window
+        update(bit, bit_size, ranks[i], 1);
+        
+        // Find median
+        if (k % 2 != 0) {
+            int r = find_kth(bit, bit_size, mid1);
+            result[i - k + 1] = unique_vals[r];
+        } else {
+            int r1 = find_kth(bit, bit_size, mid1);
+            int r2 = find_kth(bit, bit_size, mid2);
+            result[i - k + 1] = (unique_vals[r1] + unique_vals[r2]) / 2.0;
+        }
+        
+        // Remove the element leaving the window
+        update(bit, bit_size, ranks[i - k + 1], -1);
+    }
+    
+    // Free allocated memory
+    free(pairs);
+    free(ranks);
+    free(unique_vals);
+    free(bit);
+    
+    return result;
+}
 
