@@ -1,0 +1,16 @@
+#include <gpioman.h>
+#include <time.h>
+
+int main() {
+    // Set Digital Pin 0 as OUTPUT
+    pinMode(0, OUTPUT);
+
+    while (1) {
+        digitalWrite(0, HIGH); // Turn LED ON
+        delay(1000);           // Wait 1 second
+        
+        digitalWrite(0, LOW);  // Turn LED OFF
+        delay(1000);           // Wait 1 second
+    }
+    return 0;
+}
