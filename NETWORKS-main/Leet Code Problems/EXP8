@@ -1,1 +1,35 @@
+#include <stdio.h>
 
+int numOfSubarrays(int* arr, int arrSize, int k, int threshold) {
+    // If the array is smaller than the target window size, no valid subarray exists
+    if (arrSize < k) {
+        return 0;
+    }
+    
+    // Convert the average threshold to a target sum threshold to avoid division
+    int targetSum = k * threshold;
+    int currentSum = 0;
+    int validSubarrayCount = 0;
+    
+    // 1. Calculate the sum of the first window of size k
+    for (int i = 0; i < k; i++) {
+        currentSum += arr[i];
+    }
+    
+    // Check the first window
+    if (currentSum >= targetSum) {
+        validSubarrayCount++;
+    }
+    
+    // 2. Slide the window across the remaining elements of the array
+    for (int i = k; i < arrSize; i++) {
+        // Add the incoming element and subtract the outgoing element
+        currentSum += arr[i] - arr[i - k];
+        
+        if (currentSum >= targetSum) {
+            validSubarrayCount++;
+        }
+    }
+    
+    return validSubarrayCount;
+}
