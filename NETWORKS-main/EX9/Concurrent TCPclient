@@ -1,0 +1,112 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/wait.h>
+#include <arpa/inet.h>
+
+#define PORT 8080
+#define BUFFER_SIZE 1024
+
+// Signal handler to clean up zombie child processes
+void handle_sigchld(int sig) {
+    (void)sig; // suppress unused parameter warning
+    while (waitpid(-1, NULL, WNOHANG) > 0);
+}
+
+void handle_client(int client_fd, struct sockaddr_in client_addr) {
+    char buffer[BUFFER_SIZE] = {0};
+    char *client_ip = inet_ntoa(client_addr.sin_addr);
+    int client_port = ntohs(client_addr.sin_port);
+
+    printf("[Child Process %d] Handling client %s:%d\n", getpid(), client_ip, client_port);
+
+    // Read client message
+    int bytes_read = read(client_fd, buffer, BUFFER_SIZE);
+    if (bytes_read > 0) {
+        printf("[Child Process %d] Received: %s\n", getpid(), buffer);
+
+        // Simulate some work to demonstrate concurrency
+        sleep(2); 
+
+        // Send response back
+        char response[BUFFER_SIZE];
+        snprintf(response, sizeof(response), "Hello from Concurrent Server (PID %d)!", getpid());
+        send(client_fd, response, strlen(response), 0);
+    }
+
+    close(client_fd);
+    printf("[Child Process %d] Connection closed.\n", getpid());
+    exit(0); // Terminate child process
+}
+
+int main() {
+    int server_fd, client_fd;
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t addr_len = sizeof(client_addr);
+
+    // Reap all dead child processes to avoid zombies
+    struct sigaction sa;
+    sa.sa_handler = handle_sigchld;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    if (sigaction(SIGCHLD, &sa, NULL) == -1) {
+        perror("sigaction error");
+        exit(EXIT_FAILURE);
+    }
+
+    // 1. Create socket
+    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+        perror("Socket failed");
+        exit(EXIT_FAILURE);
+    }
+
+    // Configure server address
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
+
+    // 2. Bind
+    if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("Bind failed");
+        close(server_fd);
+        exit(EXIT_FAILURE);
+    }
+
+    // 3. Listen
+    if (listen(server_fd, 10) < 0) {
+        perror("Listen failed");
+        close(server_fd);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Concurrent Server (Parent PID %d) listening on port %d...\n", getpid(), PORT);
+
+    // 4. Accept loop
+    while (1) {
+        client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &addr_len);
+        if (client_fd < 0) {
+            perror("Accept failed");
+            continue;
+        }
+
+        // Fork a child process to handle the connection concurrently
+        pid_t pid = fork();
+
+        if (pid < 0) {
+            perror("Fork failed");
+            close(client_fd);
+        } else if (pid == 0) {
+            // --- Child Process ---
+            close(server_fd); // Child doesn't need the listening socket
+            handle_client(client_fd, client_addr);
+        } else {
+            // --- Parent Process ---
+            close(client_fd); // Parent doesn't need the client socket
+        }
+    }
+
+    close(server_fd);
+    return 0;
+}
